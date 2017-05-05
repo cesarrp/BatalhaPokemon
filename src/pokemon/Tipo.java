@@ -1,0 +1,19 @@
+package pokemon;
+
+public enum Tipo {
+	FIRE,
+	WATER,
+	GRASS,
+	ELECTRIC,
+	GHOST,
+	PSYCHIC,
+	ROCK,
+	ICE,
+	GROUND,
+	BUG,
+	NORMAL,
+	POISON,
+	FLYING,
+	DRAGON,
+	FIGHTING
+}
