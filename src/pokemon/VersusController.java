@@ -24,7 +24,7 @@ public class VersusController {
 		
 		Treinador treinadorA = 
 				new Treinador(
-						new Pokemon[] { 
+						new Pokemon[]{
 								new Pokemon(NomePokemon.Charmander, 60,
 										new Ataque[] { 
 												new Ataque("SCRATCH", 40, 60, Tipo.NORMAL), 
@@ -67,8 +67,8 @@ public class VersusController {
 										12),
 								null,
 								null
-								}
-						);
+								
+						});
 		
 		Treinador treinadorB = 
 				new Treinador(

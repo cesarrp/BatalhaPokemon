@@ -12,4 +12,22 @@ public class Ataque {
 		this.velocidade = velocidade;
 		this.tipoAtaque = tipoAtaque;
 	}
+
+	public String getNome() {
+		return nome;
+	}
+
+	public int getDano() {
+		return dano;
+	}
+
+	public int getVelocidade() {
+		return velocidade;
+	}
+
+	public Tipo getTipoAtaque() {
+		return tipoAtaque;
+	}
+	
+	
 }
