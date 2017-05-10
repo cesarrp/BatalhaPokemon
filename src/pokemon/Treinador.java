@@ -4,6 +4,7 @@ public class Treinador {
 	private String nomeTreinador;
 	private Pokemon[] listaPokemons = new Pokemon[6];
 	private int pokemonAtivo;
+	private boolean desmaiados = false;
 	
 	public int getPokemonAtivo() {
 		return pokemonAtivo;
@@ -31,6 +32,10 @@ public class Treinador {
 	}
 	
 	public boolean todosPokemonsDesmaiados(){
+		for (int i = 0; i < listaPokemons.length; i++){
+			if(listaPokemons[i].desmaiado() == false)
+				return false;
+		}
 		return true;
 	}
 	

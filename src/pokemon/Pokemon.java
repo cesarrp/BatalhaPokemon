@@ -60,7 +60,10 @@ public class Pokemon {
 	}
 	
 	public boolean desmaiado(){
-		return true;
+		if(hp <= 0)
+			return true;
+		else
+			return false;
 	}
 	
 	public void sofrerAtaque(){

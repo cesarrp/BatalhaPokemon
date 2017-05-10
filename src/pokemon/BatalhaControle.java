@@ -2,7 +2,7 @@ package pokemon;
 
 import java.util.Random;
 
-import events.Event;
+import events.*;
 
 	public class BatalhaControle extends Controller{
 		private boolean fugiuBatalha = false;
@@ -57,11 +57,28 @@ import events.Event;
 			}
 			
 			public void action(){
-				usuario.getPokemon(usuario.getPokemonAtivo()).setHP(usuario.getPokemon(usuario.getPokemonAtivo()).getHp() + 20); 
+				usuario.getPokemon(usuario.getPokemonAtivo()).setHP(usuario.getPokemon(usuario.getPokemonAtivo()).getHp() + potion); 
 			}
 			
 			public String description(){
 				return "Item usado com sucesso pelo " + usuario.getNomeTreinador();
+			}
+		}
+		
+		private class ComecarBatalha extends Event{
+			private Treinador treinadorA;
+			private Treinador treinadorB;
+			
+			public ComecarBatalha(long eventTime,Treinador treinadorA, Treinador treinadorB){
+				super(eventTime);
+			}
+			
+			public void action(){
+				
+			}
+			
+			public String description(){
+				return "Teste!! ";
 			}
 		}
 		
