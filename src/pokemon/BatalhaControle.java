@@ -6,6 +6,7 @@ import events.Event;
 
 	public class BatalhaControle extends Controller{
 		private boolean fugiuBatalha = false;
+		private int potion = 20;
 		
 		private class FugirBatalha extends Event{
 			private Treinador desistente;
@@ -46,6 +47,21 @@ import events.Event;
 			
 			public String description(){
 				return "Pokemon trocado para: "; //+ pokemonAtivo.getNome()
+			}
+		}
+		
+		private class UsarItem extends Event{
+			Treinador usuario;
+			public UsarItem(long eventTime){
+				super(eventTime);
+			}
+			
+			public void action(){
+				usuario.getPokemon(usuario.getPokemonAtivo()).setHP(usuario.getPokemon(usuario.getPokemonAtivo()).getHp() + 20); 
+			}
+			
+			public String description(){
+				return "Item usado com sucesso pelo " + usuario.getNomeTreinador();
 			}
 		}
 		

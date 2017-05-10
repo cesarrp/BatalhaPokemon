@@ -17,7 +17,44 @@ public class Pokemon {
 		this.level = level;
 	}
 	
+	public NomePokemon getNome() {
+		return nome;
+	}
+
+	public int getHp() {
+		return hp;
+	}
 	
+	public void setHP(int hp){
+		this.hp = hp;
+	}
+
+
+
+	public Ataque[] getListaAtaques() {
+		return listaAtaques;
+	}
+
+
+
+	public Tipo getTipoPokemon() {
+		return tipoPokemon;
+	}
+
+
+
+	public int getVelocidade() {
+		return velocidade;
+	}
+
+
+
+	public int getLevel() {
+		return level;
+	}
+
+
+
 	public void atacar(){
 		
 	}
