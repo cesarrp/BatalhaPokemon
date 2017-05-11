@@ -5,6 +5,11 @@ class EventSet {
 	private Event[] events = new Event[100];
 	private int index = 0;
 	private int next = 0;
+	
+
+	public Event[] getEvents() {
+		return events;
+	}
 
 	public void add(Event e) {
 		if (index >= events.length)
@@ -31,4 +36,5 @@ class EventSet {
 	public void removeCurrent() {
 		events[next] = null;
 	}
+		
 }

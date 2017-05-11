@@ -5,7 +5,25 @@ public class Treinador {
 	private Pokemon[] listaPokemons = new Pokemon[6];
 	private int pokemonAtivo;
 	private boolean desmaiados = false;
+	private boolean fugiuBatalha = false;
+	private int prioridadeAcao; //1-Fugir 2-Trocar Pokemon 3-Usar item 4-atacar
 	
+	public int getPrioridadeAcao() {
+		return prioridadeAcao;
+	}
+
+	public void setPrioridadeAcao(int prioridadeAcao) {
+		this.prioridadeAcao = prioridadeAcao;
+	}
+
+	public boolean isFugiuBatalha() {
+		return fugiuBatalha;
+	}
+
+	public void setFugiuBatalha(boolean fugiuBatalha) {
+		this.fugiuBatalha = fugiuBatalha;
+	}
+
 	public int getPokemonAtivo() {
 		return pokemonAtivo;
 	}
