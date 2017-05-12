@@ -5,13 +5,11 @@ import java.util.ArrayList;
 public class Treinador {
 	private String nomeTreinador;
 	private ArrayList<Pokemon> listaPokemons = new ArrayList<Pokemon>();
-	private int pokemonAtivo;
-	private boolean desmaiados = false;
+	private int indicePokemonAtivo;
 	private boolean fugiuBatalha = false;
 	private Acao prioridadeAcao;
-	private int indexAtaqueEscolhido;
+	private int indiceAtaqueEscolhido;
 	
-
 	// Matriz com indices de [TipoAtaque.ordinal()][TipoPokemonAtacado.ordinal()]
 	private static final double[][] multiplicadorDano = new double[][] {
 			{ 1.0, 1.0, 1.0, 0.5, 0.5, 0.5, 0.5, 2.0, 1.0, 1.0, 1.0, 2.0, 2.0, 1.0, 1.0 },
@@ -31,12 +29,12 @@ public class Treinador {
 			{ 1.0, 0.5, 1.0, 1.0, 2.0, 1.0, 1.0, 0.5, 2.0, 1.0, 1.0, 1.0, 1.0, 2.0, 0.5 } };
 			
 	
-	public int getIndexAtaqueEscolhido() {
-		return indexAtaqueEscolhido;
+	public int getIndiceAtaqueEscolhido() {
+		return indiceAtaqueEscolhido;
 	}
 
-	public void setIndexAtaqueEscolhido(int indexAtaqueEscolhido) {
-		this.indexAtaqueEscolhido = indexAtaqueEscolhido;
+	public void setIndiceAtaqueEscolhido(int indiceAtaqueEscolhido) {
+		this.indiceAtaqueEscolhido = indiceAtaqueEscolhido;
 	}			
 	public Acao getPrioridadeAcao() {
 		return prioridadeAcao;
@@ -46,7 +44,7 @@ public class Treinador {
 		this.prioridadeAcao = prioridadeAcao;
 	}
 
-	public boolean isFugiuBatalha() {
+	public boolean getFugiuBatalha() {
 		return fugiuBatalha;
 	}
 
@@ -54,18 +52,18 @@ public class Treinador {
 		this.fugiuBatalha = fugiuBatalha;
 	}
 
-	public int getPokemonAtivo() {
-		return pokemonAtivo;
+	public int getIndicePokemonAtivo() {
+		return indicePokemonAtivo;
 	}
 
-	public Pokemon pokemonAtivo() {
-		return listaPokemons.get(pokemonAtivo);
+	public void setIndicePokemonAtivo(int pokemonAtivo) {
+		this.indicePokemonAtivo = pokemonAtivo;
 	}
-
-	public void setPokemonAtivo(int pokemonAtivo) {
-		this.pokemonAtivo = pokemonAtivo;
+	
+	public Pokemon getPokemonAtivo() {
+		return listaPokemons.get(indicePokemonAtivo);
 	}
-
+	
 	public String getNomeTreinador() {
 		return nomeTreinador;
 	}
@@ -78,14 +76,18 @@ public class Treinador {
 		return listaPokemons.get(i);
 	}
 
-	public Ataque getAtaqueEscolhido(int indiceAtaque) {
-		return listaPokemons.get(pokemonAtivo).getAtaque(indiceAtaque);
+	public Ataque getAtaque(int indiceAtaque) {
+		return getPokemonAtivo().getAtaque(indiceAtaque);
+	}
+	
+	public Ataque getAtaqueEscolhido() {
+		return getPokemonAtivo().getAtaque(indiceAtaqueEscolhido);
 	}
 
 	public Treinador(String nomeTreinador, ArrayList<Pokemon> listaPokemons){ 
 	    this.nomeTreinador = nomeTreinador; 
 		this.listaPokemons = listaPokemons;
-		pokemonAtivo = 0;
+		indicePokemonAtivo = 0;
 	}
 
 	public boolean todosPokemonsDesmaiados() {
@@ -97,22 +99,22 @@ public class Treinador {
 	}
 	
 	public double calculaMultiplicador(Treinador treinadorDefensor, int indiceAtaque){
-		return multiplicadorDano[this.getAtaqueEscolhido(indiceAtaque).getTipoAtaque().ordinal()]
-								[treinadorDefensor.pokemonAtivo().getTipoPokemon().ordinal()];
+		
+		return multiplicadorDano[this.getAtaque(indiceAtaque).getTipoAtaque().ordinal()]
+								[treinadorDefensor.getPokemonAtivo().getTipoPokemon().ordinal()];
 	}
 
-	public int danoTotal(Treinador treinadorDefensor, int indiceAtaque) {
+	public int danoTotal(Treinador treinadorDefensor) {
 
-		return (int) (this.getAtaqueEscolhido(indiceAtaque).getDano() * this.pokemonAtivo().getLevel()
-				* calculaMultiplicador(treinadorDefensor, indiceAtaque)
-				/ treinadorDefensor.pokemonAtivo().getLevel());
+		return (int) (this.getAtaqueEscolhido().getDano() * this.getPokemonAtivo().getLevel()
+				* calculaMultiplicador(treinadorDefensor, indiceAtaqueEscolhido)
+				/ treinadorDefensor.getPokemonAtivo().getLevel());
 	}
 
 	public Acao escolherAcao() {
-		// TODO: gerar numero aleatorio
 		double randomNumber = Math.random(); // 0 a 1
 		double porcentagemPokemonsMortos = (quantidadePokemons() - pokemonsVivos().size()) / quantidadePokemons();
-		int danoPokemonAtivo = 100 - this.pokemonAtivo().getHp();
+		int danoPokemonAtivo = 100 - this.getPokemonAtivo().getHp();
 		// soma de tudo deve ser 1 (100%)
 		double probFugir = 0.1 + 0.002 * danoPokemonAtivo + 0.4 * porcentagemPokemonsMortos;
 		double probTrocar = 0.1 + 0.003 * danoPokemonAtivo + 0.2 * porcentagemPokemonsMortos;
@@ -132,7 +134,7 @@ public class Treinador {
 	public int escolherAtaque(Treinador treinadorDefensor){
 		double[] ataqueTotal = new double[4];
 		double somaAtaques = 0;
-		Ataque[] ataqueArray = (Ataque[]) pokemonAtivo().getListaAtaques().toArray();
+		Ataque[] ataqueArray = getPokemonAtivo().getListaAtaques().toArray(new Ataque[4]);
 		for(int i=0; i<4; i++){
 			if(ataqueArray[i] == null){
 				ataqueTotal[i] = 0;
@@ -155,10 +157,10 @@ public class Treinador {
 			return 0;
 	}
 
-	public int velocidadeAtaqueEscolhido(int indiceAtaque) {
-		return this.getAtaqueEscolhido(indiceAtaque).getVelocidade()
-				* this.pokemonAtivo().getLevel()
-				* this.pokemonAtivo().getVelocidade();
+	public int velocidadeAtaqueEscolhido() {
+		return this.getAtaqueEscolhido().getVelocidade()
+				* this.getPokemonAtivo().getLevel()
+				* this.getPokemonAtivo().getVelocidade();
 	}
 
 	public ArrayList<Integer> pokemonsVivos() {
