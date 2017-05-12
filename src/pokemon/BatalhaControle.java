@@ -181,10 +181,37 @@ import events.*;
 			
 			public String description(){
 				if(tA.todosPokemonsDesmaiados() || tA.isFugiuBatalha())
-					return tB.getNomeTreinador()  + "venceu a batalha!";
+					return tB.getNomeTreinador()  + " venceu a batalha!";
 				else
 					return tA.getNomeTreinador() + " venceu a batalha!";
 			}
+		}
+		
+		private class Atacar extends Event{
+			Treinador tA; //atacante
+			Treinador tB; //defensor
+			public Atacar(long eventTime, Treinador tA, Treinador tB){
+				super(eventTime);
+				this.tA = tA;
+				this.tB = tB;
+			}
+			
+			public  void action(){
+				tA.setIndexAtaqueEscolhido(tA.escolherAtaque(tB));
+				tA.pokemonAtivo().sofrerAtaque(tA.danoTotal(tB, tA.getIndexAtaqueEscolhido()));
+				
+			}
+			
+			public String description(){
+				if(tA.calculaMultiplicador(tB, tA.getIndexAtaqueEscolhido()) == 2)
+					return tA.pokemonAtivo().getNome().name() + " used " + tA.getAtaqueEscolhido(tA.getIndexAtaqueEscolhido()).getNome() + "\nIt's super effective!";
+				else if(tA.calculaMultiplicador(tB, tA.getIndexAtaqueEscolhido()) == 0.5)
+					return tA.pokemonAtivo().getNome().name() + " used " + tA.getAtaqueEscolhido(tA.getIndexAtaqueEscolhido()).getNome() + "\nIt's not very effective!";
+				else
+					return tA.pokemonAtivo().getNome().name() + " used " + tA.getAtaqueEscolhido(tA.getIndexAtaqueEscolhido()).getNome();
+			}
+			
+		
 		}
 			
 		private class NovoRound extends Event{
@@ -199,7 +226,7 @@ import events.*;
 					t[i].setPrioridadeAcao(t[i].escolherAcao());
 				}
 				
-				if(t[0].getPrioridadeAcao().ordinal() >= t[1].getPrioridadeAcao().ordinal()){
+				if(t[0].getPrioridadeAcao().ordinal() <= t[1].getPrioridadeAcao().ordinal()){
 					for(int i = 0; i < 2; i++){
 						if(t[i].getPrioridadeAcao() == Acao.FUGIR)
 							addEvent(new FugirBatalha(tm + 1000 + 2000*i, t[i]));
@@ -207,7 +234,10 @@ import events.*;
 							addEvent(new TrocarPokemon(tm + 1000 + 2000*i, t[i]));
 						else if(t[i].getPrioridadeAcao() == Acao.ITEM)
 							addEvent(new UsarItem(tm + 1000 + 2000*i, t[i]));
-						else System.out.println("Lutem!");
+						else if(i == 0 && t[i].getPrioridadeAcao() == Acao.ATACAR)
+							addEvent(new Atacar(tm + 1000 + 2000*i,t[0],t[1]));
+						else
+							addEvent(new Atacar(tm + 1000 + 2000*i,t[1],t[0]));
 					}
 				}
 				else{
@@ -218,13 +248,16 @@ import events.*;
 							addEvent(new TrocarPokemon(tm + 1000 + 2000*i, t[i]));
 						else if(t[i].getPrioridadeAcao() == Acao.ITEM)
 							addEvent(new UsarItem(tm + 1000 + 2000*i, t[i]));
-						//else LUTA
+						else if(i == 0 && t[i].getPrioridadeAcao() == Acao.ATACAR)
+							addEvent(new Atacar(tm + 1000 + 2000*i,t[0],t[1]));
+						else
+							addEvent(new Atacar(tm + 1000 + 2000*i,t[1],t[0]));
 					}					
 				}
+				addEvent(new FinalizaRound(tm + 4000));
 				
 			}
 
-			
 			public String description(){
 				cont_round ++;
 				return "Round " + cont_round;
@@ -242,9 +275,13 @@ import events.*;
 			}
 			
 			public String description(){
-				String str1 = t[0].getPokemon(t[0].getPokemonAtivo()).getNome().name() + " do treinador " + t[0].getNomeTreinador() + " esta com " + t[0].getPokemon(t[0].getPokemonAtivo()).getHp() + " de HP\n";
-				String str2 = t[1].getPokemon(t[1].getPokemonAtivo()).getNome().name() + " do treinador " + t[1].getNomeTreinador() + " esta com " + t[1].getPokemon(t[1].getPokemonAtivo()).getHp() + " de HP\n";
-				return str1 + str2;
+				if (!acabouBatalha()){
+					String str1 = t[0].getPokemon(t[0].getPokemonAtivo()).getNome().name() + " do treinador " + t[0].getNomeTreinador() + " esta com " + t[0].getPokemon(t[0].getPokemonAtivo()).getHp() + " de HP\n";
+					String str2 = t[1].getPokemon(t[1].getPokemonAtivo()).getNome().name() + " do treinador " + t[1].getNomeTreinador() + " esta com " + t[1].getPokemon(t[1].getPokemonAtivo()).getHp() + " de HP\n";
+					return str1 + str2;
+				}
+				else
+					return "";
 			}
 			
 		}

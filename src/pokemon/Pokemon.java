@@ -70,7 +70,9 @@ public class Pokemon {
 			return false;
 	}
 	
-	public void sofrerAtaque(){
-		
+	public void sofrerAtaque(int dano){
+		hp -= dano;
+		if(hp < 0)
+			hp = 0;
 	}
 }
