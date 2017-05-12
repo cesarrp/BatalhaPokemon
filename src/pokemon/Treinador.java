@@ -85,18 +85,21 @@ public class Treinador {
 		}
 		return true;
 	}
+	
+	public double calculaMultiplicador(Treinador treinadorDefensor, int indiceAtaque){
+		return multiplicadorDano[this.getAtaqueEscolhido(indiceAtaque).getTipoAtaque().ordinal()]
+								[treinadorDefensor.pokemonAtivo().getTipoPokemon().ordinal()];
+	}
 
 	public int danoTotal(Treinador treinadorDefensor, int indiceAtaque) {
 
 		return (int) (this.getAtaqueEscolhido(indiceAtaque).getDano() * this.pokemonAtivo().getLevel()
-				* multiplicadorDano	[this.getAtaqueEscolhido(indiceAtaque).getTipoAtaque().ordinal()]
-									[treinadorDefensor.pokemonAtivo().getTipoPokemon().ordinal()]
+				* calculaMultiplicador(treinadorDefensor, indiceAtaque)
 				/ treinadorDefensor.pokemonAtivo().getLevel());
 	}
 
 	public Acao escolherAcao() {
 		// TODO: gerar numero aleatorio
-		long tm = System.currentTimeMillis();
 		double randomNumber = Math.random(); // 0 a 1
 		double porcentagemPokemonsMortos = (quantidadePokemons() - pokemonsVivos().size()) / quantidadePokemons();
 		int danoPokemonAtivo = 100 - this.pokemonAtivo().getHp();
@@ -116,8 +119,30 @@ public class Treinador {
 			return Acao.ATACAR;
 	}
 
-	public int escolherAtaque() {
-		return 1;
+	public int escolherAtaque(Treinador treinadorDefensor){
+		double[] ataqueTotal = new double[4];
+		double somaAtaques = 0;
+		Ataque[] ataqueArray = (Ataque[]) pokemonAtivo().getListaAtaques().toArray();
+		for(int i=0; i<4; i++){
+			if(ataqueArray[i] == null){
+				ataqueTotal[i] = 0;
+			}
+			else{
+				ataqueTotal[i] = ataqueArray[i].getDano()*calculaMultiplicador(treinadorDefensor, i);
+			}
+			somaAtaques += ataqueTotal[i];
+		}
+		double randomNumber = Math.random(); // 0 a 1
+		if(randomNumber >= 0 && randomNumber < ataqueTotal[0]/somaAtaques)
+			return 0;
+		else if(randomNumber >= ataqueTotal[0]/somaAtaques && randomNumber < (ataqueTotal[0]/somaAtaques + ataqueTotal[1]/somaAtaques))
+			return 1;
+		else if(randomNumber >= (ataqueTotal[0]/somaAtaques + ataqueTotal[1]/somaAtaques) && randomNumber < (ataqueTotal[0]/somaAtaques + ataqueTotal[1]/somaAtaques + ataqueTotal[2]/somaAtaques))
+			return 2;
+		else if(randomNumber >= (ataqueTotal[0]/somaAtaques + ataqueTotal[1]/somaAtaques + ataqueTotal[2]/somaAtaques) && randomNumber < (ataqueTotal[0]/somaAtaques + ataqueTotal[1]/somaAtaques + ataqueTotal[2]/somaAtaques + ataqueTotal[3]/somaAtaques))
+			return 3;
+		else
+			return 0;
 	}
 
 	public int velocidadeAtaqueEscolhido(int indiceAtaque) {
