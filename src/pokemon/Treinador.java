@@ -72,7 +72,8 @@ public class Treinador {
 		return listaPokemons.get(pokemonAtivo).getAtaque(indiceAtaque);
 	}
 
-	public Treinador(ArrayList<Pokemon> listaPokemons) {
+	public Treinador(String nomeTreinador, ArrayList<Pokemon> listaPokemons){ 
+	    this.nomeTreinador = nomeTreinador; 
 		this.listaPokemons = listaPokemons;
 		pokemonAtivo = 0;
 	}
@@ -95,7 +96,8 @@ public class Treinador {
 
 	public Acao escolherAcao() {
 		// TODO: gerar numero aleatorio
-		double randomNumber = 0; // 0 a 1
+		long tm = System.currentTimeMillis();
+		double randomNumber = Math.random(); // 0 a 1
 		double porcentagemPokemonsMortos = (quantidadePokemons() - pokemonsVivos().size()) / quantidadePokemons();
 		int danoPokemonAtivo = 100 - this.pokemonAtivo().getHp();
 		// soma de tudo deve ser 1 (100%)
