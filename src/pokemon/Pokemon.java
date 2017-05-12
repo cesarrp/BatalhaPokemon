@@ -1,14 +1,16 @@
 package pokemon;
 
+import java.util.ArrayList;
+
 public class Pokemon {
 	private NomePokemon nome;
 	private int hp;
-	private Ataque[] listaAtaques = new Ataque[3];
+	private ArrayList<Ataque> listaAtaques = new ArrayList<Ataque>();
 	private Tipo tipoPokemon;
 	private int velocidade;
 	private int level;
 	
-	public Pokemon(NomePokemon nome, int hp, Ataque[] listaAtaques, Tipo tipoPokemon, int velocidade, int level){
+	public Pokemon(NomePokemon nome, int hp, ArrayList<Ataque> listaAtaques, Tipo tipoPokemon, int velocidade, int level){
 		this.nome = nome;
 		this.hp = hp;
 		this.listaAtaques = listaAtaques;
@@ -31,7 +33,7 @@ public class Pokemon {
 
 
 
-	public Ataque[] getListaAtaques() {
+	public ArrayList<Ataque> getListaAtaques() {
 		return listaAtaques;
 	}
 
@@ -53,7 +55,9 @@ public class Pokemon {
 		return level;
 	}
 
-
+	public Ataque getAtaque(int i){
+		return listaAtaques.get(i);
+	}
 
 	public void atacar(){
 		
