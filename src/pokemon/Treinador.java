@@ -44,7 +44,8 @@ public class Treinador {
 		return listaPokemons[i];
 	}
 
-	public Treinador(Pokemon[] listaPokemons){
+	public Treinador(String nomeTreinador, Pokemon[] listaPokemons){
+		this.nomeTreinador = nomeTreinador;
 		this.listaPokemons = listaPokemons;
 		pokemonAtivo = 0;
 	}
