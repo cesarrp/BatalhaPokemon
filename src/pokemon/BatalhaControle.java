@@ -214,19 +214,36 @@ public class BatalhaControle extends Controller {
 
 		public void action() {
 			tA.setIndiceAtaqueEscolhido(tA.escolherAtaque(tB));
-			tA.getPokemonAtivo().sofrerAtaque(tA.danoTotal(tB));
+			if(tA.getPokemonAtivo().getHp() > 0)
+				tB.getPokemonAtivo().sofrerAtaque(tA.danoTotal(tB));
+			
+			if(tB.getPokemonAtivo().getHp() == 0){
+				addEvent(new TrocarPokemon(System.currentTimeMillis() + 4000,tB));
+			}
 
 		}
 
-		public String description() {
-			if (tA.calculaMultiplicador(tB, tA.getIndiceAtaqueEscolhido()) == 2.0)
-				return tA.getPokemonAtivo().getNome().name() + " used " + tA.getAtaqueEscolhido().getNome()
-						+ "\nIt's super effective!";
-			else if (tA.calculaMultiplicador(tB, tA.getIndiceAtaqueEscolhido()) == 0.5)
-				return tA.getPokemonAtivo().getNome().name() + " used " + tA.getAtaqueEscolhido().getNome()
-						+ "\nIt's not very effective!";
-			else
-				return tA.getPokemonAtivo().getNome().name() + " used " + tA.getAtaqueEscolhido().getNome();
+		public String description() {		
+			String str1 = "\n" + tB.getPokemonAtivo().getNome().name() + " do treinador " + tB.getNomeTreinador() + " desmaiou!\n";
+			String superEff = tA.getPokemonAtivo().getNome().name() + " used " + tA.getAtaqueEscolhido().getNome()+ "\nIt's super effective!";
+			String notEff = tA.getPokemonAtivo().getNome().name() + " used " + tA.getAtaqueEscolhido().getNome()+ "\nIt's not very effective!";
+			String eff = tA.getPokemonAtivo().getNome().name() + " used " + tA.getAtaqueEscolhido().getNome();
+			if(tA.getPokemonAtivo().getHp() > 0){
+				if (tA.calculaMultiplicador(tB, tA.getIndiceAtaqueEscolhido()) == 2.0)
+					return superEff;
+				else if (tA.calculaMultiplicador(tB, tA.getIndiceAtaqueEscolhido()) == 2.0 && tB.getPokemonAtivo().getHp() == 0)
+					return superEff + str1;
+				else if (tA.calculaMultiplicador(tB, tA.getIndiceAtaqueEscolhido()) == 0.5)
+					return notEff;
+				else if(tA.calculaMultiplicador(tB, tA.getIndiceAtaqueEscolhido()) == 0.5 && tB.getPokemonAtivo().getHp() == 0)
+					return notEff + str1;
+				else if (tA.calculaMultiplicador(tB, tA.getIndiceAtaqueEscolhido()) == 1.0 && tB.getPokemonAtivo().getHp() == 0)
+					return eff + str1;
+				else
+					return eff;
+		
+			}
+			else return tA.getPokemonAtivo().getNome().name() + " esta morto, portanto nao pode atacar!";
 		}
 
 	}
@@ -246,23 +263,46 @@ public class BatalhaControle extends Controller {
 			}
 
 			int order = ordem();
-			for (int i = 0; i <= 1; i++) {
-				switch (t[i].getPrioridadeAcao()) {
-				case FUGIR:
-					addEvent(new FugirBatalha(tm + 1000 + 2000 * (i), t[(order + i) % 2]));
-					break;
-				case TROCAR:
-					addEvent(new TrocarPokemon(tm + 1000 + 2000 * (i), t[(order + i) % 2]));
-					break;
-				case ITEM:
-					addEvent(new UsarItem(tm + 1000 + 2000 * (i), t[(order + i) % 2]));
-					break;
-				case ATACAR:
-					addEvent(new Atacar(tm + 1000 + 2000 * (i), t[(order + i) % 2], t[order]));
+			if(order == 0)
+				for (int i = 0; i <= 1; i++) {
+					switch (t[i].getPrioridadeAcao()) {
+					case FUGIR:
+						addEvent(new FugirBatalha(tm + 1000 + 2000 * (i), t[i]));
+						break;
+					case TROCAR:
+						if(t[0].getPrioridadeAcao() != Acao.FUGIR)
+						addEvent(new TrocarPokemon(tm + 1000 + 2000 * (i), t[i]));
+						break;
+					case ITEM:
+						if(t[0].getPrioridadeAcao() != Acao.FUGIR)
+						addEvent(new UsarItem(tm + 1000 + 2000 * (i), t[i]));
+						break;
+					case ATACAR:
+						if(t[0].getPrioridadeAcao() != Acao.FUGIR)
+						addEvent(new Atacar(tm + 1000 + 2000 * (i), t[i],t[(i + 1) % 2]));
+					}
 				}
-			}
+			else
+				for (int i = 1; i >= 0; i--) {
+					switch (t[i].getPrioridadeAcao()) {
+					case FUGIR:
+						addEvent(new FugirBatalha(tm + 3000 - 2000 * (i), t[i]));
+						break;
+					case TROCAR:
+						if(t[1].getPrioridadeAcao() != Acao.FUGIR)
+						addEvent(new TrocarPokemon(tm + 3000 - 2000 * (i), t[i]));
+						break;
+					case ITEM:
+						if(t[1].getPrioridadeAcao() != Acao.FUGIR)
+						addEvent(new UsarItem(tm + 3000 - 2000 * (i), t[i]));
+						break;
+					case ATACAR:
+						if(t[1].getPrioridadeAcao() != Acao.FUGIR)
+						addEvent(new Atacar(tm + 3000 - 2000 * (i), t[i], t[(i+1) % 2]));
+					}
+				}
 
-			addEvent(new FinalizaRound(tm + 4000));
+			addEvent(new FinalizaRound(tm + 6000));
 
 		}
 

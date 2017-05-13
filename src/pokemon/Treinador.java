@@ -116,7 +116,7 @@ public class Treinador {
 		double porcentagemPokemonsMortos = (quantidadePokemons() - pokemonsVivos().size()) / quantidadePokemons();
 		int danoPokemonAtivo = 100 - this.getPokemonAtivo().getHp();
 		// soma de tudo deve ser 1 (100%)
-		double probFugir = 0.1 + 0.002 * danoPokemonAtivo + 0.4 * porcentagemPokemonsMortos;
+		double probFugir =  0.1 + 0.002 * danoPokemonAtivo + 0.4 * porcentagemPokemonsMortos;
 		double probTrocar = 0.1 + 0.003 * danoPokemonAtivo + 0.2 * porcentagemPokemonsMortos;
 		double probItem = 0.0 + 0.003 * danoPokemonAtivo + 0.2 * porcentagemPokemonsMortos;
 		// double probAtacar = 0.8 + 0.002*danoPokemonAtivo + 0.4 * porcentagemPokemonsMortos;
