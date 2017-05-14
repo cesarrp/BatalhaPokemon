@@ -15,6 +15,7 @@ public class BatalhaControle extends Controller {
 
 	private class FugirBatalha extends Event {
 		private Treinador desistente;
+		
 
 		public FugirBatalha(long eventTime, Treinador desistente) {
 			super(eventTime);
@@ -33,6 +34,7 @@ public class BatalhaControle extends Controller {
 
 	private class TrocarPokemon extends Event {
 		Treinador trocador;
+		boolean sorteou = false;
 
 		public TrocarPokemon(long eventTime, Treinador trocador) {
 			super(eventTime);
@@ -41,18 +43,22 @@ public class BatalhaControle extends Controller {
 
 		public void action() {
 			Random random = new Random();
-			boolean sorteou = false;
-			if (trocador.getListaPokemons().size() == 1)
-				sorteou = true;
-			else {
+			if(trocador.pokemonsVivos().size() == 1 && trocador.getPokemonAtivo().desmaiado()){
+				addEvent(new FimBatalha(System.currentTimeMillis() + 1000,trocador));
+			}
+			else if (trocador.pokemonsVivos().size() != 1) {
 				int i;
-				while (sorteou != true) {
-					do {
-						i = random.nextInt(trocador.getListaPokemons().size());
-					} while (trocador.getListaPokemons().get(i) == null);
-					if (i != trocador.getIndicePokemonAtivo() && trocador.getListaPokemons().get(i).desmaiado() == false) {
-						trocador.setIndicePokemonAtivo(i);
-						sorteou = true;
+				if(trocador.todosPokemonsDesmaiados())
+					addEvent(new FimBatalha(System.currentTimeMillis() + 1000, trocador));
+				else{
+					while (sorteou != true) {
+						do {
+							i = random.nextInt(trocador.getListaPokemons().size());
+						} while (trocador.getListaPokemons().get(i) == null);
+						if (i != trocador.getIndicePokemonAtivo() && trocador.getListaPokemons().get(i).desmaiado() == false) {
+							trocador.setIndicePokemonAtivo(i);
+							sorteou = true;
+						}
 					}
 				}
 			}
@@ -61,8 +67,12 @@ public class BatalhaControle extends Controller {
 		}
 
 		public String description() {
-			return trocador.getNomeTreinador() + " trocou para: "
+			if(sorteou)
+				return trocador.getNomeTreinador() + " trocou para: "
 					+ trocador.getPokemonAtivo().getNome();
+			else
+				return trocador.getPokemonAtivo().getNome().name() + " do treinador " + trocador.getNomeTreinador() + " desmaiou! \n"
+						+ trocador.getNomeTreinador() + " nao possui mais pokemons vivos!";
 		}
 	}
 
@@ -75,8 +85,10 @@ public class BatalhaControle extends Controller {
 		}
 
 		public void action() {
-			usuario.getPokemonAtivo()
-					.setHP(usuario.getPokemonAtivo().getHp() + potion);
+			if(usuario.getPokemonAtivo().getHp() + potion <= 100)
+			usuario.getPokemonAtivo().setHP(usuario.getPokemonAtivo().getHp() + potion);
+			else
+				usuario.getPokemonAtivo().setHP(100);
 			usuario.setPrioridadeAcao(Acao.ITEM);
 		}
 
@@ -173,8 +185,8 @@ public class BatalhaControle extends Controller {
 	}
 
 	public boolean acabouBatalha() {
-		if (t[0].todosPokemonsDesmaiados() || t[1].todosPokemonsDesmaiados() || t[0].getFugiuBatalha()
-				|| t[1].getFugiuBatalha())
+		if ((t[0].pokemonsVivos().size() == 1 && t[0].getPokemonAtivo().desmaiado()) ||( t[1].pokemonsVivos().size() == 1 && t[1].getPokemonAtivo().desmaiado() )|| 
+				t[0].getFugiuBatalha() || t[1].getFugiuBatalha())
 			return true;
 		else
 			return false;
@@ -189,13 +201,20 @@ public class BatalhaControle extends Controller {
 			this.tA = tA;
 			this.tB = tB;
 		}
+		
+		public FimBatalha(long eventTime, Treinador tA) {
+			super(eventTime);
+			this.tA = tA;
+			if(tA.equals(t[0])) this.tB = t[1];
+			else this.tB = t[0];
+		}
 
 		public void action() {
 			finalizaEventos();
 		}
 
 		public String description() {
-			if (tA.todosPokemonsDesmaiados() || tA.getFugiuBatalha())
+			if ((tA.pokemonsVivos().size() == 1 && tA.getPokemonAtivo().desmaiado()) || tA.getFugiuBatalha())
 				return tB.getNomeTreinador() + " venceu a batalha!";
 			else
 				return tA.getNomeTreinador() + " venceu a batalha!";
@@ -224,26 +243,19 @@ public class BatalhaControle extends Controller {
 		}
 
 		public String description() {		
-			String str1 = "\n" + tB.getPokemonAtivo().getNome().name() + " do treinador " + tB.getNomeTreinador() + " desmaiou!\n";
 			String superEff = tA.getPokemonAtivo().getNome().name() + " used " + tA.getAtaqueEscolhido().getNome()+ "\nIt's super effective!";
 			String notEff = tA.getPokemonAtivo().getNome().name() + " used " + tA.getAtaqueEscolhido().getNome()+ "\nIt's not very effective!";
 			String eff = tA.getPokemonAtivo().getNome().name() + " used " + tA.getAtaqueEscolhido().getNome();
 			if(tA.getPokemonAtivo().getHp() > 0){
 				if (tA.calculaMultiplicador(tB, tA.getIndiceAtaqueEscolhido()) == 2.0)
 					return superEff;
-				else if (tA.calculaMultiplicador(tB, tA.getIndiceAtaqueEscolhido()) == 2.0 && tB.getPokemonAtivo().getHp() == 0)
-					return superEff + str1;
-				else if (tA.calculaMultiplicador(tB, tA.getIndiceAtaqueEscolhido()) == 0.5)
+				else if(tA.calculaMultiplicador(tB, tA.getIndiceAtaqueEscolhido()) == 0.5 && tB.getPokemonAtivo().getHp() <= 0)
 					return notEff;
-				else if(tA.calculaMultiplicador(tB, tA.getIndiceAtaqueEscolhido()) == 0.5 && tB.getPokemonAtivo().getHp() == 0)
-					return notEff + str1;
-				else if (tA.calculaMultiplicador(tB, tA.getIndiceAtaqueEscolhido()) == 1.0 && tB.getPokemonAtivo().getHp() == 0)
-					return eff + str1;
 				else
 					return eff;
 		
 			}
-			else return tA.getPokemonAtivo().getNome().name() + " esta morto, portanto nao pode atacar!";
+			else return "";
 		}
 
 	}
@@ -261,7 +273,6 @@ public class BatalhaControle extends Controller {
 				if (t[i].getPrioridadeAcao() == Acao.ATACAR)
 					t[i].setIndiceAtaqueEscolhido(t[i].escolherAtaque(t[(i + 1) % 2]));
 			}
-
 			int order = ordem();
 			if(order == 0)
 				for (int i = 0; i <= 1; i++) {
@@ -335,14 +346,23 @@ public class BatalhaControle extends Controller {
 		}
 
 		public String description() {
-			if (!acabouBatalha()) {
+			if (!acabouBatalha()) {		
 				String str1 = t[0].getPokemonAtivo().getNome().name() + " do treinador "
 						+ t[0].getNomeTreinador() + " esta com " + t[0].getPokemonAtivo().getHp()
 						+ " de HP\n";
 				String str2 = t[1].getPokemonAtivo().getNome().name() + " do treinador "
 						+ t[1].getNomeTreinador() + " esta com " + t[1].getPokemonAtivo().getHp()
 						+ " de HP\n";
-				return str1 + str2;
+				if(t[0].getPokemonAtivo().getHp() == 0){
+					String str3 = t[0].getPokemonAtivo().getNome().name() + " do treinador " + t[0].getNomeTreinador() + " desmaiou!\n";
+					return str3 + str1 + str2;
+				}
+				else if(t[1].getPokemonAtivo().getHp() == 0){
+					String str4 = t[1].getPokemonAtivo().getNome().name() + " do treinador " + t[1].getNomeTreinador() + " desmaiou!\n";
+					return str4 + str1 + str2;
+				}
+				else
+					return str1 + str2;
 			} else
 				return "";
 		}
@@ -352,18 +372,17 @@ public class BatalhaControle extends Controller {
 	public static void main(String[] args) {
 		
 		//reproduz video com musica de batalha
-//		Desktop desktop = null;
-//		desktop = Desktop.getDesktop();
-//		URI uri = null;
-//		try {
-//			uri = new URI("https://www.youtube.com/watch?v=2Jmty_NiaXc");
-//			desktop.browse(uri);
-//		} catch (IOException ioe) {
-//			ioe.printStackTrace();
-//		} catch (URISyntaxException use) {
-//			use.printStackTrace();
-//		}
-		
+		Desktop desktop = null;
+		desktop = Desktop.getDesktop();
+		URI uri = null;
+		try {
+			uri = new URI("https://www.youtube.com/watch?v=2Jmty_NiaXc");
+			desktop.browse(uri);
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+		} catch (URISyntaxException use) {
+			use.printStackTrace();
+		}
 		
 		BatalhaControle bc = new BatalhaControle();
 		long tm = System.currentTimeMillis();
