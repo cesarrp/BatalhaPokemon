@@ -59,10 +59,6 @@ public class Pokemon {
 		return listaAtaques.get(i);
 	}
 
-	public void atacar(){
-		
-	}
-	
 	public boolean desmaiado(){
 		if(hp <= 0)
 			return true;
