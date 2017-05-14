@@ -9,7 +9,25 @@ public class Treinador {
 	private boolean fugiuBatalha = false;
 	private Acao prioridadeAcao;
 	private int indiceAtaqueEscolhido;
+	private int posI;
+	private int posJ;
 	
+	public int getPosI() {
+		return posI;
+	}
+
+	public void setPosI(int posI) {
+		this.posI = posI;
+	}
+
+	public int getPosJ() {
+		return posJ;
+	}
+
+	public void setPosJ(int posJ) {
+		this.posJ = posJ;
+	}
+
 	// Matriz com indices de [TipoAtaque.ordinal()][TipoPokemonAtacado.ordinal()]
 	private static final double[][] multiplicadorDano = new double[][] {
 			{ 1.0, 1.0, 1.0, 0.5, 0.5, 0.5, 0.5, 2.0, 1.0, 1.0, 1.0, 2.0, 2.0, 1.0, 1.0 },

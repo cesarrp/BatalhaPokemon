@@ -12,6 +12,9 @@ public class BatalhaControle extends Controller {
 	private int potion = 20;
 	private Treinador t[] = new Treinador[2];
 	private int cont_round = 0;
+	static char[][] mapa = {{'T','G','G'},{'T','T','G'},{'G','G','T'}};
+	static boolean batalhar; //variavel de passagem para quando os dois treinadores se encotrarem batalharem so uma vez e dps seguirem caminho
+	private int cont_rodadas;
 
 	private class FugirBatalha extends Event {
 		private Treinador desistente;
@@ -175,9 +178,7 @@ public class BatalhaControle extends Controller {
 		return tB;
 	}
 
-	public void comecaBatalha(Treinador tA, Treinador tB) {
-		t[0] = tA;
-		t[1] = tB;
+	public void comecaBatalha() {
 		System.out.println("Batalha Pokemon");
 		System.out.println(t[0].getNomeTreinador() + " vs " + t[1].getNomeTreinador());
 		System.out.println(t[0].getNomeTreinador() + " escolheu " + t[0].getPokemonAtivo().getNome());
@@ -368,28 +369,171 @@ public class BatalhaControle extends Controller {
 		}
 
 	}
+	
+	public void inicializaTreinadores(){
+		Random rand = new Random();
+		for(int i = 0; i < 2; i++){
+			t[i].setPosI(rand.nextInt(mapa.length));
+			t[i].setPosJ(rand.nextInt(mapa[0].length));
+		}
+		
+	}
+	
+	private class Andar extends Event{
+		Treinador tA;
+		public Andar(long eventTime, Treinador tA){
+			super(eventTime);
+			this.tA = tA;
+		}
+		
+		public void action(){
+			if(!econtrouTreinador() && batalhar == true)
+				mover(tA,this.sorteiaMovimento(),mapa);
+		}
+		
+		public String description(){
+			return tA.getNomeTreinador() + " esta em " + "[" + tA.getPosI() + "] " + "[" + tA.getPosJ() + "]";
+		}
+		
+		public Movimento sorteiaMovimento(){
+			Random rand = new Random();
+			int n = rand.nextInt(4);
+			switch (n){
+			case 0:
+				return Movimento.CIMA;
+			case 1:
+				return Movimento.BAIXO;
+			case 2:
+				return Movimento.ESQUERDA;
+			case 3:
+				return Movimento.DIREITA;
+			default:
+				return Movimento.DIREITA;
+			}
+			
+		}
+		
+		public void mover (Treinador tA,Movimento m, char[][] mapa){
+			switch (m){
+			case CIMA:
+				if(tA.getPosI() == 0)
+					tA.setPosI(mapa.length - 1);
+				else
+					tA.setPosI(tA.getPosI() - 1);
+				break;
+			case ESQUERDA:
+				if(tA.getPosJ() == 0)
+					tA.setPosJ(mapa[0].length - 1);
+				else
+					tA.setPosJ(tA.getPosJ() - 1);
+				break;
+			case BAIXO:
+				if(tA.getPosI() == mapa.length - 1)
+					tA.setPosI(0);
+				else
+					tA.setPosI(tA.getPosI() + 1);
+				break;
+			case DIREITA:
+				if(tA.getPosJ() == mapa[0].length - 1)
+					tA.setPosJ(0);
+				else
+					tA.setPosJ(tA.getPosJ() + 1);
+				break;
+				
+			}
+		}
+		
+	}
+
+	
+	private class PercorrerMapa extends Event{
+		public PercorrerMapa(long eventTime){
+			super(eventTime);
+		}
+		
+		public void action(){
+			addEvent(new Andar(System.currentTimeMillis() + 1000,t[0]));
+			addEvent(new Andar(System.currentTimeMillis() + 1000,t[1]));
+		}
+		
+		public String description(){
+			cont_rodadas++;
+			return "Rodada " + cont_rodadas;
+		}
+		
+		
+	}
+	
+	public boolean encontrouPokemon(Treinador tA){
+		if(mapa[tA.getPosI()][tA.getPosJ()] == 'G'){
+			if(Math.random() >= 0.5) return true;
+			else
+				return false;
+		}
+		else
+			return false;
+		
+	}
+	
+	public boolean econtrouTreinador(){
+		if(mapa[t[0].getPosI()][t[0].getPosJ()] == 'T'){
+			if(t[0].getPosI() == t[1].getPosI() && t[0].getPosJ() == t[1].getPosJ())
+				return true;
+			else
+				return false;
+		}
+		else
+			return false;
+			
+	}
+	
+	public boolean acabouJogo(){
+		if((t[0].pokemonsVivos().size() == 1 && t[0].getPokemonAtivo().desmaiado())||( t[1].pokemonsVivos().size() == 1 && t[1].getPokemonAtivo().desmaiado()))
+			return true;
+		else
+			return false;
+				
+	}
+	
+	public void comecarJogo(Treinador tA, Treinador tB){
+		t[0] = tA;
+		t[1] = tB;
+		System.out.println("Bem-vindo a cidade de Pallet!");
+		System.out.println("Treinador 1: " + t[0].getNomeTreinador());
+		System.out.println("Treinador 2: " + t[1].getNomeTreinador());
+	}
 
 	public static void main(String[] args) {
 		
 		//reproduz video com musica de batalha
-		Desktop desktop = null;
-		desktop = Desktop.getDesktop();
-		URI uri = null;
-		try {
-			uri = new URI("https://www.youtube.com/watch?v=2Jmty_NiaXc");
-			desktop.browse(uri);
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
-		} catch (URISyntaxException use) {
-			use.printStackTrace();
-		}
+//		Desktop desktop = null;
+//		desktop = Desktop.getDesktop();
+//		URI uri = null;
+//		try {
+//			uri = new URI("https://www.youtube.com/watch?v=2Jmty_NiaXc");
+//			desktop.browse(uri);
+//		} catch (IOException ioe) {
+//			ioe.printStackTrace();
+//		} catch (URISyntaxException use) {
+//			use.printStackTrace();
+//		}
 		
 		BatalhaControle bc = new BatalhaControle();
 		long tm = System.currentTimeMillis();
-		bc.comecaBatalha(bc.treinadorA(), bc.treinadorB());
-		while (bc.acabouBatalha() == false) {
-			bc.addEvent(bc.new NovoRound(tm));
-			bc.run();
+		bc.comecarJogo(bc.treinadorA(), bc.treinadorB());
+		bc.inicializaTreinadores();
+		while(!bc.acabouJogo()){
+		bc.addEvent(bc.new PercorrerMapa(tm));
+		batalhar = true;
+			if(bc.econtrouTreinador()){
+				bc.comecaBatalha();
+				while (bc.acabouBatalha() == false) {
+					bc.addEvent(bc.new NovoRound(tm));
+					bc.run();
+				}
+				batalhar = false;
+			}
+			//TODO:else se encontrar pokemon...
 		}
 	}
 
