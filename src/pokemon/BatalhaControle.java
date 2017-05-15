@@ -12,13 +12,16 @@ public class BatalhaControle extends Controller {
 	private int potion = 20;
 	private Treinador t[] = new Treinador[2];
 	private int cont_round = 0;
-	static char[][] mapa = {{'T','G','G'},{'T','T','G'},{'G','G','T'}};
-	static boolean batalhar; //variavel de passagem para quando os dois treinadores se encotrarem batalharem so uma vez e dps seguirem caminho
+	static TipoCenario[][] mapa = { { TipoCenario.CHAO, TipoCenario.GRAMA, TipoCenario.TREINADOR },
+			{ TipoCenario.CHAO, TipoCenario.GRAMA, TipoCenario.GRAMA },
+			{ TipoCenario.TREINADOR, TipoCenario.CHAO, TipoCenario.GRAMA } };
+	static boolean batalhar;// variavel de passagem para quando os dois
+							// treinadores se encotrarem batalharem so uma
+							// vez e dps seguirem caminho
 	private int cont_rodadas;
 
 	private class FugirBatalha extends Event {
 		private Treinador desistente;
-		
 
 		public FugirBatalha(long eventTime, Treinador desistente) {
 			super(eventTime);
@@ -46,19 +49,19 @@ public class BatalhaControle extends Controller {
 
 		public void action() {
 			Random random = new Random();
-			if(trocador.pokemonsVivos().size() == 1 && trocador.getPokemonAtivo().desmaiado()){
-				addEvent(new FimBatalha(System.currentTimeMillis() + 1000,trocador));
-			}
-			else if (trocador.pokemonsVivos().size() != 1) {
+			if (trocador.pokemonsVivos().size() == 1 && trocador.getPokemonAtivo().desmaiado()) {
+				addEvent(new FimBatalha(System.currentTimeMillis() + 1000, trocador));
+			} else if (trocador.pokemonsVivos().size() != 1) {
 				int i;
-				if(trocador.todosPokemonsDesmaiados())
+				if (trocador.todosPokemonsDesmaiados())
 					addEvent(new FimBatalha(System.currentTimeMillis() + 1000, trocador));
-				else{
+				else {
 					while (sorteou != true) {
 						do {
 							i = random.nextInt(trocador.getListaPokemons().size());
 						} while (trocador.getListaPokemons().get(i) == null);
-						if (i != trocador.getIndicePokemonAtivo() && trocador.getListaPokemons().get(i).desmaiado() == false) {
+						if (i != trocador.getIndicePokemonAtivo()
+								&& trocador.getListaPokemons().get(i).desmaiado() == false) {
 							trocador.setIndicePokemonAtivo(i);
 							sorteou = true;
 						}
@@ -70,12 +73,11 @@ public class BatalhaControle extends Controller {
 		}
 
 		public String description() {
-			if(sorteou)
-				return trocador.getNomeTreinador() + " trocou para: "
-					+ trocador.getPokemonAtivo().getNome();
+			if (sorteou)
+				return trocador.getNomeTreinador() + " trocou para: " + trocador.getPokemonAtivo().getNome();
 			else
-				return trocador.getPokemonAtivo().getNome().name() + " do treinador " + trocador.getNomeTreinador() + " desmaiou! \n"
-						+ trocador.getNomeTreinador() + " nao possui mais pokemons vivos!";
+				return trocador.getPokemonAtivo().getNome().name() + " do treinador " + trocador.getNomeTreinador()
+						+ " desmaiou! \n" + trocador.getNomeTreinador() + " nao possui mais pokemons vivos!";
 		}
 	}
 
@@ -88,8 +90,8 @@ public class BatalhaControle extends Controller {
 		}
 
 		public void action() {
-			if(usuario.getPokemonAtivo().getHp() + potion <= 100)
-			usuario.getPokemonAtivo().setHP(usuario.getPokemonAtivo().getHp() + potion);
+			if (usuario.getPokemonAtivo().getHp() + potion <= 100)
+				usuario.getPokemonAtivo().setHP(usuario.getPokemonAtivo().getHp() + potion);
 			else
 				usuario.getPokemonAtivo().setHP(100);
 			usuario.setPrioridadeAcao(Acao.ITEM);
@@ -186,8 +188,9 @@ public class BatalhaControle extends Controller {
 	}
 
 	public boolean acabouBatalha() {
-		if ((t[0].pokemonsVivos().size() == 1 && t[0].getPokemonAtivo().desmaiado()) ||( t[1].pokemonsVivos().size() == 1 && t[1].getPokemonAtivo().desmaiado() )|| 
-				t[0].getFugiuBatalha() || t[1].getFugiuBatalha())
+		if ((t[0].pokemonsVivos().size() == 1 && t[0].getPokemonAtivo().desmaiado())
+				|| (t[1].pokemonsVivos().size() == 1 && t[1].getPokemonAtivo().desmaiado()) || t[0].isFugiuBatalha()
+				|| t[1].isFugiuBatalha())
 			return true;
 		else
 			return false;
@@ -202,12 +205,14 @@ public class BatalhaControle extends Controller {
 			this.tA = tA;
 			this.tB = tB;
 		}
-		
+
 		public FimBatalha(long eventTime, Treinador tA) {
 			super(eventTime);
 			this.tA = tA;
-			if(tA.equals(t[0])) this.tB = t[1];
-			else this.tB = t[0];
+			if (tA.equals(t[0]))
+				this.tB = t[1];
+			else
+				this.tB = t[0];
 		}
 
 		public void action() {
@@ -215,7 +220,7 @@ public class BatalhaControle extends Controller {
 		}
 
 		public String description() {
-			if ((tA.pokemonsVivos().size() == 1 && tA.getPokemonAtivo().desmaiado()) || tA.getFugiuBatalha())
+			if ((tA.pokemonsVivos().size() == 1 && tA.getPokemonAtivo().desmaiado()) || tA.isFugiuBatalha())
 				return tB.getNomeTreinador() + " venceu a batalha!";
 			else
 				return tA.getNomeTreinador() + " venceu a batalha!";
@@ -234,29 +239,32 @@ public class BatalhaControle extends Controller {
 
 		public void action() {
 			tA.setIndiceAtaqueEscolhido(tA.escolherAtaque(tB));
-			if(tA.getPokemonAtivo().getHp() > 0)
+			if (tA.getPokemonAtivo().getHp() > 0)
 				tB.getPokemonAtivo().sofrerAtaque(tA.danoTotal(tB));
-			
-			if(tB.getPokemonAtivo().getHp() == 0){
-				addEvent(new TrocarPokemon(System.currentTimeMillis() + 4000,tB));
+
+			if (tB.getPokemonAtivo().getHp() == 0) {
+				addEvent(new TrocarPokemon(System.currentTimeMillis() + 4000, tB));
 			}
 
 		}
 
-		public String description() {		
-			String superEff = tA.getPokemonAtivo().getNome().name() + " used " + tA.getAtaqueEscolhido().getNome()+ "\nIt's super effective!";
-			String notEff = tA.getPokemonAtivo().getNome().name() + " used " + tA.getAtaqueEscolhido().getNome()+ "\nIt's not very effective!";
+		public String description() {
+			String superEff = tA.getPokemonAtivo().getNome().name() + " used " + tA.getAtaqueEscolhido().getNome()
+					+ "\nIt's super effective!";
+			String notEff = tA.getPokemonAtivo().getNome().name() + " used " + tA.getAtaqueEscolhido().getNome()
+					+ "\nIt's not very effective!";
 			String eff = tA.getPokemonAtivo().getNome().name() + " used " + tA.getAtaqueEscolhido().getNome();
-			if(tA.getPokemonAtivo().getHp() > 0){
+			if (tA.getPokemonAtivo().getHp() > 0) {
 				if (tA.calculaMultiplicador(tB, tA.getIndiceAtaqueEscolhido()) == 2.0)
 					return superEff;
-				else if(tA.calculaMultiplicador(tB, tA.getIndiceAtaqueEscolhido()) == 0.5 && tB.getPokemonAtivo().getHp() <= 0)
+				else if (tA.calculaMultiplicador(tB, tA.getIndiceAtaqueEscolhido()) == 0.5
+						&& tB.getPokemonAtivo().getHp() <= 0)
 					return notEff;
 				else
 					return eff;
-		
-			}
-			else return "";
+
+			} else
+				return "";
 		}
 
 	}
@@ -275,23 +283,23 @@ public class BatalhaControle extends Controller {
 					t[i].setIndiceAtaqueEscolhido(t[i].escolherAtaque(t[(i + 1) % 2]));
 			}
 			int order = ordem();
-			if(order == 0)
+			if (order == 0)
 				for (int i = 0; i <= 1; i++) {
 					switch (t[i].getPrioridadeAcao()) {
 					case FUGIR:
 						addEvent(new FugirBatalha(tm + 1000 + 2000 * (i), t[i]));
 						break;
 					case TROCAR:
-						if(t[0].getPrioridadeAcao() != Acao.FUGIR)
-						addEvent(new TrocarPokemon(tm + 1000 + 2000 * (i), t[i]));
+						if (t[0].getPrioridadeAcao() != Acao.FUGIR)
+							addEvent(new TrocarPokemon(tm + 1000 + 2000 * (i), t[i]));
 						break;
 					case ITEM:
-						if(t[0].getPrioridadeAcao() != Acao.FUGIR)
-						addEvent(new UsarItem(tm + 1000 + 2000 * (i), t[i]));
+						if (t[0].getPrioridadeAcao() != Acao.FUGIR)
+							addEvent(new UsarItem(tm + 1000 + 2000 * (i), t[i]));
 						break;
 					case ATACAR:
-						if(t[0].getPrioridadeAcao() != Acao.FUGIR)
-						addEvent(new Atacar(tm + 1000 + 2000 * (i), t[i],t[(i + 1) % 2]));
+						if (t[0].getPrioridadeAcao() != Acao.FUGIR)
+							addEvent(new Atacar(tm + 1000 + 2000 * (i), t[i], t[(i + 1) % 2]));
 					}
 				}
 			else
@@ -301,16 +309,16 @@ public class BatalhaControle extends Controller {
 						addEvent(new FugirBatalha(tm + 3000 - 2000 * (i), t[i]));
 						break;
 					case TROCAR:
-						if(t[1].getPrioridadeAcao() != Acao.FUGIR)
-						addEvent(new TrocarPokemon(tm + 3000 - 2000 * (i), t[i]));
+						if (t[1].getPrioridadeAcao() != Acao.FUGIR)
+							addEvent(new TrocarPokemon(tm + 3000 - 2000 * (i), t[i]));
 						break;
 					case ITEM:
-						if(t[1].getPrioridadeAcao() != Acao.FUGIR)
-						addEvent(new UsarItem(tm + 3000 - 2000 * (i), t[i]));
+						if (t[1].getPrioridadeAcao() != Acao.FUGIR)
+							addEvent(new UsarItem(tm + 3000 - 2000 * (i), t[i]));
 						break;
 					case ATACAR:
-						if(t[1].getPrioridadeAcao() != Acao.FUGIR)
-						addEvent(new Atacar(tm + 3000 - 2000 * (i), t[i], t[(i+1) % 2]));
+						if (t[1].getPrioridadeAcao() != Acao.FUGIR)
+							addEvent(new Atacar(tm + 3000 - 2000 * (i), t[i], t[(i + 1) % 2]));
 					}
 				}
 
@@ -347,58 +355,57 @@ public class BatalhaControle extends Controller {
 		}
 
 		public String description() {
-			if (!acabouBatalha()) {		
-				String str1 = t[0].getPokemonAtivo().getNome().name() + " do treinador "
-						+ t[0].getNomeTreinador() + " esta com " + t[0].getPokemonAtivo().getHp()
-						+ " de HP\n";
-				String str2 = t[1].getPokemonAtivo().getNome().name() + " do treinador "
-						+ t[1].getNomeTreinador() + " esta com " + t[1].getPokemonAtivo().getHp()
-						+ " de HP\n";
-				if(t[0].getPokemonAtivo().getHp() == 0){
-					String str3 = t[0].getPokemonAtivo().getNome().name() + " do treinador " + t[0].getNomeTreinador() + " desmaiou!\n";
+			if (!acabouBatalha()) {
+				String str1 = t[0].getPokemonAtivo().getNome().name() + " do treinador " + t[0].getNomeTreinador()
+						+ " esta com " + t[0].getPokemonAtivo().getHp() + " de HP\n";
+				String str2 = t[1].getPokemonAtivo().getNome().name() + " do treinador " + t[1].getNomeTreinador()
+						+ " esta com " + t[1].getPokemonAtivo().getHp() + " de HP\n";
+				if (t[0].getPokemonAtivo().getHp() == 0) {
+					String str3 = t[0].getPokemonAtivo().getNome().name() + " do treinador " + t[0].getNomeTreinador()
+							+ " desmaiou!\n";
 					return str3 + str1 + str2;
-				}
-				else if(t[1].getPokemonAtivo().getHp() == 0){
-					String str4 = t[1].getPokemonAtivo().getNome().name() + " do treinador " + t[1].getNomeTreinador() + " desmaiou!\n";
+				} else if (t[1].getPokemonAtivo().getHp() == 0) {
+					String str4 = t[1].getPokemonAtivo().getNome().name() + " do treinador " + t[1].getNomeTreinador()
+							+ " desmaiou!\n";
 					return str4 + str1 + str2;
-				}
-				else
+				} else
 					return str1 + str2;
 			} else
 				return "";
 		}
 
 	}
-	
-	public void inicializaTreinadores(){
+
+	public void inicializaTreinadores() {
 		Random rand = new Random();
-		for(int i = 0; i < 2; i++){
+		for (int i = 0; i < 2; i++) {
 			t[i].setPosI(rand.nextInt(mapa.length));
 			t[i].setPosJ(rand.nextInt(mapa[0].length));
 		}
-		
+
 	}
-	
-	private class Andar extends Event{
+
+	private class Andar extends Event {
 		Treinador tA;
-		public Andar(long eventTime, Treinador tA){
+
+		public Andar(long eventTime, Treinador tA) {
 			super(eventTime);
 			this.tA = tA;
 		}
-		
-		public void action(){
-			if(!econtrouTreinador() && batalhar == true)
-				mover(tA,this.sorteiaMovimento(),mapa);
+
+		public void action() {
+			if (!encontrouTreinador() && batalhar == true)
+				mover(tA, this.sorteiaMovimento(), mapa);
 		}
-		
-		public String description(){
+
+		public String description() {
 			return tA.getNomeTreinador() + " esta em " + "[" + tA.getPosI() + "] " + "[" + tA.getPosJ() + "]";
 		}
-		
-		public Movimento sorteiaMovimento(){
+
+		public Movimento sorteiaMovimento() {
 			Random rand = new Random();
 			int n = rand.nextInt(4);
-			switch (n){
+			switch (n) {
 			case 0:
 				return Movimento.CIMA;
 			case 1:
@@ -410,92 +417,90 @@ public class BatalhaControle extends Controller {
 			default:
 				return Movimento.DIREITA;
 			}
-			
+
 		}
-		
-		public void mover (Treinador tA,Movimento m, char[][] mapa){
-			switch (m){
+
+		public void mover(Treinador tA, Movimento m, TipoCenario[][] mapa) {
+			switch (m) {
 			case CIMA:
-				if(tA.getPosI() == 0)
+				if (tA.getPosI() == 0)
 					tA.setPosI(mapa.length - 1);
 				else
 					tA.setPosI(tA.getPosI() - 1);
 				break;
 			case ESQUERDA:
-				if(tA.getPosJ() == 0)
+				if (tA.getPosJ() == 0)
 					tA.setPosJ(mapa[0].length - 1);
 				else
 					tA.setPosJ(tA.getPosJ() - 1);
 				break;
 			case BAIXO:
-				if(tA.getPosI() == mapa.length - 1)
+				if (tA.getPosI() == mapa.length - 1)
 					tA.setPosI(0);
 				else
 					tA.setPosI(tA.getPosI() + 1);
 				break;
 			case DIREITA:
-				if(tA.getPosJ() == mapa[0].length - 1)
+				if (tA.getPosJ() == mapa[0].length - 1)
 					tA.setPosJ(0);
 				else
 					tA.setPosJ(tA.getPosJ() + 1);
 				break;
-				
+
 			}
 		}
-		
+
 	}
 
-	
-	private class PercorrerMapa extends Event{
-		public PercorrerMapa(long eventTime){
+	private class PercorrerMapa extends Event {
+		public PercorrerMapa(long eventTime) {
 			super(eventTime);
 		}
-		
-		public void action(){
-			addEvent(new Andar(System.currentTimeMillis() + 1000,t[0]));
-			addEvent(new Andar(System.currentTimeMillis() + 1000,t[1]));
+
+		public void action() {
+			addEvent(new Andar(System.currentTimeMillis() + 1000, t[0]));
+			addEvent(new Andar(System.currentTimeMillis() + 1000, t[1]));
 		}
-		
-		public String description(){
+
+		public String description() {
 			cont_rodadas++;
 			return "Rodada " + cont_rodadas;
 		}
-		
-		
+
 	}
-	
-	public boolean encontrouPokemon(Treinador tA){
-		if(mapa[tA.getPosI()][tA.getPosJ()] == 'G'){
-			if(Math.random() >= 0.5) return true;
-			else
-				return false;
-		}
-		else
-			return false;
-		
-	}
-	
-	public boolean econtrouTreinador(){
-		if(mapa[t[0].getPosI()][t[0].getPosJ()] == 'T'){
-			if(t[0].getPosI() == t[1].getPosI() && t[0].getPosJ() == t[1].getPosJ())
+
+	public boolean encontrouPokemon(Treinador tA) {
+		if (mapa[tA.getPosI()][tA.getPosJ()] == TipoCenario.GRAMA) {
+			if (Math.random() >= 0.5)
 				return true;
 			else
 				return false;
-		}
-		else
+		} else
 			return false;
-			
+
 	}
-	
-	public boolean acabouJogo(){
-		if((t[0].pokemonsVivos().size() == 1 && t[0].getPokemonAtivo().desmaiado())||( t[1].pokemonsVivos().size() == 1 && t[1].getPokemonAtivo().desmaiado()))
+
+	public boolean encontrouTreinador() {
+		if (mapa[t[0].getPosI()][t[0].getPosJ()] == TipoCenario.TREINADOR) {
+			if (t[0].getPosI() == t[1].getPosI() && t[0].getPosJ() == t[1].getPosJ())
+				return true;
+			else
+				return false;
+		} else
+			return false;
+
+	}
+
+	public boolean acabouJogo() {
+		if ((t[0].pokemonsVivos().size() == 1 && t[0].getPokemonAtivo().desmaiado())
+				|| (t[1].pokemonsVivos().size() == 1 && t[1].getPokemonAtivo().desmaiado()))
 			return true;
 		else
 			return false;
-				
+
 	}
-	
-	public void comecarJogo(Treinador tA, Treinador tB){
+
+	public void comecarJogo(Treinador tA, Treinador tB) {
 		t[0] = tA;
 		t[1] = tB;
 		System.out.println("Bem-vindo a cidade de Pallet!");
@@ -504,28 +509,37 @@ public class BatalhaControle extends Controller {
 	}
 
 	public static void main(String[] args) {
-		
-		//reproduz video com musica de batalha
-//		Desktop desktop = null;
-//		desktop = Desktop.getDesktop();
-//		URI uri = null;
-//		try {
-//			uri = new URI("https://www.youtube.com/watch?v=2Jmty_NiaXc");
-//			desktop.browse(uri);
-//		} catch (IOException ioe) {
-//			ioe.printStackTrace();
-//		} catch (URISyntaxException use) {
-//			use.printStackTrace();
-//		}
-		
+
+		// reproduz video com musica de andar pelo mapa
+		Desktop desktop = null;
+		desktop = Desktop.getDesktop();
+		URI uri = null;
+		try {
+			uri = new URI("https://www.youtube.com/watch?v=uXv7DjdasHI");
+			desktop.browse(uri);
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+		} catch (URISyntaxException use) {
+			use.printStackTrace();
+		}
+
 		BatalhaControle bc = new BatalhaControle();
 		long tm = System.currentTimeMillis();
 		bc.comecarJogo(bc.treinadorA(), bc.treinadorB());
 		bc.inicializaTreinadores();
-		while(!bc.acabouJogo()){
-		bc.addEvent(bc.new PercorrerMapa(tm));
-		batalhar = true;
-			if(bc.econtrouTreinador()){
+		while (!bc.acabouJogo()) {
+			bc.addEvent(bc.new PercorrerMapa(tm));
+			batalhar = true;
+			if (bc.encontrouTreinador()) {
+				// reproduz video com musica de batalha
+				try {
+					uri = new URI("https://www.youtube.com/watch?v=2Jmty_NiaXc");
+					desktop.browse(uri);
+				} catch (IOException ioe) {
+					ioe.printStackTrace();
+				} catch (URISyntaxException use) {
+					use.printStackTrace();
+				}
 				bc.comecaBatalha();
 				while (bc.acabouBatalha() == false) {
 					bc.addEvent(bc.new NovoRound(tm));
@@ -533,7 +547,7 @@ public class BatalhaControle extends Controller {
 				}
 				batalhar = false;
 			}
-			//TODO:else se encontrar pokemon...
+			// TODO:else se encontrar pokemon...
 		}
 	}
 
